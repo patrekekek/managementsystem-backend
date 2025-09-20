@@ -1,26 +1,52 @@
-const User = require("../models/User");
+  const User = require("../models/User");
+  const jwt = require('jsonwebtoken');
 
-// @desc   Get all users
-const getUsers = async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  //create token
+  const createToken = (_id, role) => {
+    return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' })
   }
-};
 
-// @desc   Create new user
-const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
 
-  try {
-    const user = new User({ name, email, password });
-    const createdUser = await user.save();
-    res.status(201).json(createdUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  //login user
+  const loginUser = async (req, res) => {
+    const {email, password} = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    try {
+      const user = await User.login(email, password);
+
+      const token = createToken(user._id, user.role);
+
+      res.status(200).json({email: user.email, role: user.role, token})
+    } catch (error) {
+      res.status(400).json({error: error.message})
+    }
   }
-};
 
-module.exports = { getUsers, createUser };
+  const registerUser = async (req, res) => {
+    const {email, password} = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    try {
+      const user = await User.register(email, password, "teacher");
+
+      const token = createToken(user._id, user.role);
+
+      res.status(201).json({email: user.email, role: user.role, token})
+    } catch (error) {
+      res.status(400).json({error: error.message})
+    }
+  }
+
+
+
+
+
+
+  module.exports = { loginUser, registerUser };
