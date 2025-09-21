@@ -11,13 +11,14 @@ const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
-//Middlware
+//Middleware
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
     console.log(req.path, req.method);
     next();
 })
+
 
 //ROutes
 

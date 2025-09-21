@@ -1,9 +1,10 @@
 const Leave = require("../models/Leave.js");
-const mongoose = require('mongoose');
+
 
 //apply leave
 
 const applyLeave = async (req, res) => {
+
     const { userId, startDate, endDate, reason } = req.body;
 
     if (!userId || !startDate || !endDate) {
