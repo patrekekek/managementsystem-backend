@@ -58,8 +58,4 @@
   }
 
 
-
-
-
-
   module.exports = { loginUser, registerUser };

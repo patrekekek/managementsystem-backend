@@ -1,7 +1,4 @@
 const express = require("express");
-
-
-//controller functions
 const { loginUser, registerUser } = require('../controllers/userController')
 
 
