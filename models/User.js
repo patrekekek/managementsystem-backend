@@ -11,6 +11,12 @@ const userSchema = new Schema({
     middle: { type: String, trim: true },
     last: { type: String, required: true, trim: true }
   },
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
   office_department: {
     type: String,
     required: true,
@@ -36,7 +42,6 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true,
-    // minlength: 6
   },
   role: {
     type: String,
@@ -48,6 +53,7 @@ const userSchema = new Schema({
 
 userSchema.statics.register = async function ({
   name,
+  username,
   office_department,
   position,
   salary,
@@ -56,14 +62,14 @@ userSchema.statics.register = async function ({
   role
 }) {
 
-  if (!name || !name.first || !name.last || !office_department || !position || !salary || !email || !password || !role) {
+  if (!name || !name.first || !name.last || !username ||!office_department || !position || salary == null || !email || !password || !role) {
     throw Error("All fields must be completed");
   }
   if (!validator.isEmail(email)) {
     throw Error("Email is not valid")
   }
-  if (!validator.isStrongPassword(password)) {
-    throw Error("Password not strongn enought")
+  if (password.length < 6) {
+    throw Error("Password must be at least 6 characters long")
   }
 
   const exists = await this.findOne({ email });
@@ -71,11 +77,17 @@ userSchema.statics.register = async function ({
     throw Error ("Email already used")
   }
 
+  const usernameExists = await this.findOne({ username });
+  if (usernameExists) {
+    throw Error("Username already taken");
+  }
+
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
 
   const user = await this.create({ 
     name,
+    username,
     office_department,
     position,
     salary,
@@ -83,17 +95,22 @@ userSchema.statics.register = async function ({
     password: hash,
     role,
   })
-  return user;
+  
+  const userObj = user.toObject();
+  delete userObj.password;
+  return userObj;
+
+
 };
 
-userSchema.statics.login = async function (email, password) {
-  if (!email || !password) {
-    throw Error("All fields must be complete")
+userSchema.statics.login = async function (username, password) {
+  if (!username || !password) {
+    throw Error("All fields must be completed")
   }
 
-  const user = await this.findOne({ email });
+  const user = await this.findOne({ username });
   if (!user) {
-    throw Error("Email is incorrect");
+    throw Error("Username is incorrect");
   }
 
   const match = await bcrypt.compare(password, user.password);
@@ -101,7 +118,9 @@ userSchema.statics.login = async function (email, password) {
     throw Error("Password incorrect")
   }
 
-  return user;
+  const userObj = user.toObject();
+  delete userObj.password;
+  return userObj;
 }
 
 
