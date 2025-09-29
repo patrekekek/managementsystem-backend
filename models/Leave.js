@@ -3,18 +3,85 @@ const Schema = mongoose.Schema;
 
 const leaveSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+
+
+  officeDepartment: { type: String, required: true },
+  name: {
+    last: { type: String, required: true },
+    first: { type: String, required: true },
+    middle: { type: String }
+  },
+  dateOfFiling: { type: Date, default: Date.now },
+  position: { type: String, required: true },
+  salary: { type: Number, required: true },
+
+
+  leaveType: {
+    type: String,
+    enum: [
+      "vacation",
+      "sick",
+      "maternity",
+      "paternity",
+      "special-privilege",
+      "solo-parent",
+      "study",
+      "vawc",
+      "rehabilitation",
+      "special-women",
+      "emergency",
+      "adoption",
+      "others"
+    ],
+    required: true
+  },
+
+
+  vacation: {
+    withinPhilippines: String,
+    abroad: String
+  },
+
+
+  sick: {
+    type: { type: String, enum: ["in-hospital", "out-patient"] },
+    illness: String
+  },
+
+
+  study: {
+    mastersDegree: { type: Boolean, default: false },
+    boardExamReview: { type: Boolean, default: false }
+  },
+
+
+  others: {
+    monetization: { type: Boolean, default: false },
+    terminal: { type: Boolean, default: false }
+  },
+
+  numberOfDays: { type: Number, required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+
+
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending"
+  },
   reason: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
-// STATIC METHODS
 
-// Apply a new leave
-leaveSchema.statics.applyLeave = async function(userId, startDate, endDate, reason) {
-  // Check for overlapping leaves
+leaveSchema.statics.applyLeave = async function (
+  userId,
+  leaveData
+) {
+  const { startDate, endDate } = leaveData;
+
+
   const overlapping = await this.findOne({
     user: userId,
     $or: [
@@ -28,13 +95,13 @@ leaveSchema.statics.applyLeave = async function(userId, startDate, endDate, reas
     throw new Error("You already have a leave that overlaps with these dates.");
   }
 
-  // Create the leave
-  const leave = await this.create({ user: userId, startDate, endDate, reason });
+
+  const leave = await this.create({ user: userId, ...leaveData });
   return leave;
 };
 
-// Approve a leave
-leaveSchema.statics.approveLeave = async function(leaveId) {
+
+leaveSchema.statics.approveLeave = async function (leaveId) {
   const leave = await this.findById(leaveId);
   if (!leave) throw new Error("Leave not found");
 
@@ -43,8 +110,8 @@ leaveSchema.statics.approveLeave = async function(leaveId) {
   return leave;
 };
 
-// Reject a leave
-leaveSchema.statics.rejectLeave = async function(leaveId) {
+
+leaveSchema.statics.rejectLeave = async function (leaveId) {
   const leave = await this.findById(leaveId);
   if (!leave) throw new Error("Leave not found");
 
@@ -53,9 +120,12 @@ leaveSchema.statics.rejectLeave = async function(leaveId) {
   return leave;
 };
 
-// Optional: get leave balance (example)
-leaveSchema.statics.getLeaveBalance = async function(userId, totalLeaves = 15) {
-  const approvedLeaves = await this.countDocuments({ user: userId, status: "approved" });
+
+leaveSchema.statics.getLeaveBalance = async function (userId, totalLeaves = 15) {
+  const approvedLeaves = await this.countDocuments({
+    user: userId,
+    status: "approved"
+  });
   return totalLeaves - approvedLeaves;
 };
 

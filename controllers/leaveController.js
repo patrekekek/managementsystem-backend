@@ -1,64 +1,88 @@
 const Leave = require("../models/Leave.js");
 
-
-//apply leave
-
 const applyLeave = async (req, res) => {
+  const {
+    officeDepartment,
+    name,
+    position,
+    salary,
+    leaveType,
+    vacation,
+    sick,
+    study,
+    others,
+    numberOfDays,
+    startDate,
+    endDate,
+    reason
+  } = req.body;
 
-    const { userId, startDate, endDate, reason } = req.body;
 
-    if (!userId || !startDate || !endDate) {
-        return res.status(400).json({ error: "All fields are required "})
-    }
-
-    try {
-        const leave = await Leave.applyLeave(userId, new Date(startDate), new Date(endDate), reason);
-        res.status(201).json(leave);
-
-    } catch (error) {
-        res.status(400).json({ error: error.message})
-    }
-};
-
-const approveLeave = async (req, res) => {
-    const { leaveId } = req.params;
-
-    if (!leaveId) {
-        return res.status(400).json({ error: "leaveId is required"})
-    }
-
-    try {
-        const leave = await Leave.approveLeave(leaveId);
-        res.status(200).json(leave)
-    } catch (error) {
-        res.status(400).json({ error: error.message })
-    }
-}
-
-const rejectLeave = async (req, res) => {
-    const { leaveId } = req.params;
-
-    if (!leaveId) {
-        return res.status(400).json({ error: "leaveId is required"})
-    }
-
-    try {
-        const leave = await Leave.rejectLeave(leaveId);
-        res.status(200).json(leave)
-    } catch (error) {
-        res.status(400).json({ error: error.message })
-    }
-}
-
-const getLeaveBalance = async (req, res) => {
-  const { userId } = req.params;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" });
+  if (!officeDepartment || !name?.last || !name?.first || !position || !salary || !leaveType || !startDate || !endDate || !numberOfDays) {
+    return res.status(400).json({ error: "Missing required fields." });
   }
 
   try {
-    const balance = await Leave.getLeaveBalance(userId);
+    const leaveData = {
+      officeDepartment,
+      name,
+      position,
+      salary,
+      leaveType,
+      vacation,
+      sick,
+      study,
+      others,
+      numberOfDays,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      reason
+    };
+
+    const leave = await Leave.applyLeave(req.user._id, leaveData);
+    res.status(201).json(leave);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+const approveLeave = async (req, res) => {
+  const { leaveId } = req.params;
+
+  if (!leaveId) {
+    return res.status(400).json({ error: "leaveId is required" });
+  }
+
+  try {
+    const leave = await Leave.approveLeave(leaveId);
+    res.status(200).json(leave);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+const rejectLeave = async (req, res) => {
+  const { leaveId } = req.params;
+
+  if (!leaveId) {
+    return res.status(400).json({ error: "leaveId is required" });
+  }
+
+  try {
+    const leave = await Leave.rejectLeave(leaveId);
+    res.status(200).json(leave);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+const getLeaveBalance = async (req, res) => {
+  try {
+
+    const balance = await Leave.getLeaveBalance(req.user._id);
     res.status(200).json({ balance });
   } catch (error) {
     res.status(400).json({ error: error.message });
