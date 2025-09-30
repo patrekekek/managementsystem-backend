@@ -19,6 +19,7 @@
       const token = createToken(user._id, user.role);
 
       res.status(200).json({
+        _id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,

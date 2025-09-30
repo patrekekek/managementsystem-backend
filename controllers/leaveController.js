@@ -13,12 +13,22 @@ const applyLeave = async (req, res) => {
     others,
     numberOfDays,
     startDate,
-    endDate,
-    reason
+    endDate
   } = req.body;
 
 
-  if (!officeDepartment || !name?.last || !name?.first || !position || !salary || !leaveType || !startDate || !endDate || !numberOfDays) {
+  if (
+    !officeDepartment || 
+    !name?.last || 
+    !name?.first || 
+    !position || 
+    salary === undefined || 
+    leaveType === undefined || 
+    !startDate || 
+    !endDate || 
+    numberOfDays === undefined
+
+  ) {
     return res.status(400).json({ error: "Missing required fields." });
   }
 
@@ -35,8 +45,7 @@ const applyLeave = async (req, res) => {
       others,
       numberOfDays,
       startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      reason
+      endDate: new Date(endDate)
     };
 
     const leave = await Leave.applyLeave(req.user._id, leaveData);

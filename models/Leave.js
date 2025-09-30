@@ -70,7 +70,6 @@ const leaveSchema = new Schema({
     enum: ["pending", "approved", "rejected"],
     default: "pending"
   },
-  reason: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
