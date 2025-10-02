@@ -88,9 +88,9 @@ const rejectLeave = async (req, res) => {
 };
 
 
+
 const getLeaveBalance = async (req, res) => {
   try {
-
     const balance = await Leave.getLeaveBalance(req.user._id);
     res.status(200).json({ balance });
   } catch (error) {
@@ -98,7 +98,31 @@ const getLeaveBalance = async (req, res) => {
   }
 };
 
-// for admin
+const getUserLeaves = async (req, res) => {
+  try {
+    const leaves = await Leave.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json(leaves);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+const getRecentLeaves = async (req, res) => {
+  try {
+    const leaves = await Leave.find({ user: req.user._id})
+      .sort({ createdAt: -1})
+      .limit(3);
+
+    res.status(200).json(leaves);
+
+  } catch (error) {
+    res.status(400).json({ error: error.message})
+  }
+}
+
+
+
 const getAllLeaves = async (req, res) => {
   try {
     const leaves = await Leave.find().populate("user", "name email");
@@ -113,5 +137,7 @@ module.exports = {
   approveLeave,
   rejectLeave,
   getLeaveBalance,
+  getUserLeaves,
+  getRecentLeaves,
   getAllLeaves
 };
