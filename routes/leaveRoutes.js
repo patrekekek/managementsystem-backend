@@ -6,7 +6,8 @@ const {
   getLeaveBalance,
   getUserLeaves,
   getAllLeaves,
-  getRecentLeaves
+  getRecentLeaves,
+  getLeaveById
 } = require("../controllers/leaveController");
 const requireAuth = require("../middleware/requireAuth");
 const requireAdmin = require("../middleware/requireAdmin")
@@ -26,5 +27,6 @@ router.get('/balance', getLeaveBalance);
 router.get('/all', requireAdmin,getAllLeaves);
 router.patch('/:leaveId/approve', requireAdmin, approveLeave);
 router.patch('/:leaveId/reject', requireAdmin, rejectLeave);
+router.get('/:id', requireAdmin, getLeaveById)
 
 module.exports = router;

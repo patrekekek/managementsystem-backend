@@ -132,6 +132,25 @@ const getAllLeaves = async (req, res) => {
   }
 };
 
+
+const getLeaveById = async (req,res) => {
+  try {
+    const { id } = req.params;
+
+    const leave = await Leave.findById(id).populate("user", "username email");
+
+    if (!leave) {
+      return res.status(404).json({ message: "Leave not found"})
+    }
+
+    res.status(200).json(leave);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching leave", error: error.message})
+  }
+}
+
+
+
 module.exports = {
   applyLeave,
   approveLeave,
@@ -139,5 +158,6 @@ module.exports = {
   getLeaveBalance,
   getUserLeaves,
   getRecentLeaves,
-  getAllLeaves
+  getAllLeaves,
+  getLeaveById
 };
