@@ -7,7 +7,9 @@ const {
   getUserLeaves,
   getAllLeaves,
   getRecentLeaves,
-  getLeaveById
+  getLeaveById,
+  getAllTeachers,
+  getTeacherDetails
 } = require("../controllers/leaveController");
 const requireAuth = require("../middleware/requireAuth");
 const requireAdmin = require("../middleware/requireAdmin")
@@ -23,10 +25,14 @@ router.get('/my', getUserLeaves);
 router.get('/my/recent', getRecentLeaves)
 router.get('/balance', getLeaveBalance);
 
+router.use(requireAdmin)
+
 // admin routes
-router.get('/all', requireAdmin,getAllLeaves);
-router.patch('/:leaveId/approve', requireAdmin, approveLeave);
-router.patch('/:leaveId/reject', requireAdmin, rejectLeave);
-router.get('/:id', requireAdmin, getLeaveById)
+router.get('/all',getAllLeaves);
+router.get('/teachers', getAllTeachers)
+router.get("/teachers/:id", getTeacherDetails);
+router.patch('/:leaveId/approve', approveLeave);
+router.patch('/:leaveId/reject', rejectLeave);
+router.get('/:id', getLeaveById)
 
 module.exports = router;

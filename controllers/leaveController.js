@@ -1,4 +1,5 @@
 const Leave = require("../models/Leave.js");
+const User = require("../models/User.js")
 
 const applyLeave = async (req, res) => {
   const {
@@ -150,6 +151,35 @@ const getLeaveById = async (req,res) => {
 }
 
 
+const getAllTeachers = async (req, res) => {
+  try {
+    const teachers = await User.find({ role: "teacher" })
+      .select("name email office_department position");
+    
+    res.status(200).json(teachers);
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+const getTeacherDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const teacher = await User.findById(id).select("name email office_department position");
+
+    if (!teacher) {
+      return res.status(404).json({ error: "No teacher found" })
+    }
+
+    const leaves = await Leave.find({ user: id}).sort({ createdAt: -1 })
+
+    res.status(200).json(leaves)
+  } catch (error) {
+
+  }
+}
+
 
 module.exports = {
   applyLeave,
@@ -159,5 +189,7 @@ module.exports = {
   getUserLeaves,
   getRecentLeaves,
   getAllLeaves,
-  getLeaveById
+  getLeaveById,
+  getAllTeachers,
+  getTeacherDetails
 };
