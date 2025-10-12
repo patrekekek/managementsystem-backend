@@ -1,6 +1,10 @@
   const User = require("../models/User");
   const jwt = require('jsonwebtoken');
 
+  const cloudinary = require('../config/cloudinary');
+
+
+
   const createToken = (_id, role) => {
     return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '3d' })
   }
@@ -60,5 +64,25 @@
     }
   }
 
+  const uploadProfilePic = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  module.exports = { loginUser, registerUser };
+    const result = await cloudinary.uploader.upload(req.file.path);
+
+    // Update user's profile picture
+    await User.findByIdAndUpdate(req.user._id, {
+      profilePicture: result.secure_url,
+    });
+
+    // ✅ Send only once
+    res.status(200).json({ url: result.secure_url });
+  } catch (error) {
+    console.error("Upload failed:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+  module.exports = { loginUser, registerUser, uploadProfilePic };

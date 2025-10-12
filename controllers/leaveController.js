@@ -172,9 +172,9 @@ const getTeacherDetails = async (req, res) => {
       return res.status(404).json({ error: "No teacher found" })
     }
 
-    const leaves = await Leave.find({ user: id}).sort({ createdAt: -1 })
+    const leaves = await Leave.find({ user: id }).sort({ createdAt: -1 })
 
-    res.status(200).json(leaves)
+    res.status(200).json({ teacher, leaves })
   } catch (error) {
 
   }

@@ -1,20 +1,19 @@
 const express = require("express");
 const { loginUser, registerUser } = require('../controllers/userController')
 
+const { uploadProfilePic } = require("../controllers/userController");
+const upload = require("../middleware/uploadMiddleware");
+const requireAuth = require("../middleware/requireAuth")
 
 const router = express.Router();
 
-//login route
-router.post('/login', loginUser)
 
-//register route
+router.post('/login', loginUser);
 router.post('/register', registerUser);
 
 
 
-// test route
-router.get("/", (req, res) => {
-  res.json({ message: "Users route is working 🚀" });
-});
+router.use(requireAuth);
+router.post("/upload-profile", upload.single("image"), uploadProfilePic);
 
 module.exports = router;
