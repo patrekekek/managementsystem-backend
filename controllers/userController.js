@@ -28,7 +28,9 @@
         email: user.email,
         role: user.role,
         token,
-        name: user.name
+        name: user.name,
+        profilePicture: user.profilePicture,
+
       })
     } catch (error) {
       res.status(400).json({error: error.message})
@@ -70,19 +72,43 @@
 
     const result = await cloudinary.uploader.upload(req.file.path);
 
-    // Update user's profile picture
+
     await User.findByIdAndUpdate(req.user._id, {
       profilePicture: result.secure_url,
     });
 
-    // ✅ Send only once
+
     res.status(200).json({ url: result.secure_url });
   } catch (error) {
     console.error("Upload failed:", error);
     res.status(500).json({ error: error.message });
   }
+
+  const updateBio = async (req, res) => {
+    try {
+      const userId = req.user._id; 
+      const { bio, feeling } = req.body;
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { bio, feeling },
+        { new: true }
+      );
+
+      res.json({ message: "Profile updated", user: updatedUser });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  };
+
 };
 
 
 
-  module.exports = { loginUser, registerUser, uploadProfilePic };
+
+  module.exports = { 
+    loginUser, 
+    registerUser, 
+    uploadProfilePic, 
+    updateBio 
+  };
