@@ -30,7 +30,7 @@
         token,
         name: user.name,
         profilePicture: user.profilePicture,
-
+        bio: user.bio
       })
     } catch (error) {
       res.status(400).json({error: error.message})
@@ -83,6 +83,8 @@
     console.error("Upload failed:", error);
     res.status(500).json({ error: error.message });
   }
+};
+
 
   const updateBio = async (req, res) => {
     try {
@@ -100,11 +102,6 @@
       res.status(500).json({ error: "Failed to update profile" });
     }
   };
-
-};
-
-
-
 
   module.exports = { 
     loginUser, 

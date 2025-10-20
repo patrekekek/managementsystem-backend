@@ -51,6 +51,10 @@ const userSchema = new Schema({
   profilePicture:  {
     type: String,
     default: ""
+  },
+  bio: {
+    type: String,
+    default: ""
   }
 }, { timestamps: true })
 
