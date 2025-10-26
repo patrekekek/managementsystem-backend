@@ -9,7 +9,8 @@ const {
   getRecentLeaves,
   getLeaveById,
   getAllTeachers,
-  getTeacherDetails
+  getTeacherDetails,
+  generateExcelFile
 } = require("../controllers/leaveController");
 const requireAuth = require("../middleware/requireAuth");
 const requireAdmin = require("../middleware/requireAdmin")
@@ -22,17 +23,20 @@ router.use(requireAuth);
 // teacher routes
 router.post('/apply', applyLeave);
 router.get('/my', getUserLeaves);
-router.get('/my/recent', getRecentLeaves)
+router.get('/my/recent', getRecentLeaves);
 router.get('/balance', getLeaveBalance);
 
-router.use(requireAdmin)
+//generate excel file
+router.get('/generate-excel/:id', generateExcelFile);
+
+router.use(requireAdmin);
 
 // admin routes
 router.get('/all',getAllLeaves);
-router.get('/teachers', getAllTeachers)
+router.get('/teachers', getAllTeachers);
 router.get("/teachers/:id", getTeacherDetails);
 router.patch('/:leaveId/approve', approveLeave);
 router.patch('/:leaveId/reject', rejectLeave);
-router.get('/:id', getLeaveById)
+router.get('/:id', getLeaveById);
 
 module.exports = router;
