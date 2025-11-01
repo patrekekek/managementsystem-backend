@@ -158,7 +158,7 @@ const getLeaveById = async (req,res) => {
 const getAllTeachers = async (req, res) => {
   try {
     const teachers = await User.find({ role: "teacher" })
-      .select("name email office_department position salary profilePicture, bio, role");
+      .select("name email office_department position salary profilePicture bio role username");
     
     res.status(200).json(teachers);
   } catch (error) {

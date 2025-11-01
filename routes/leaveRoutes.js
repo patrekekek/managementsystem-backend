@@ -33,6 +33,7 @@ router.use(requireAdmin);
 
 // admin routes
 router.get('/all',getAllLeaves);
+//i think should be moved to userRoutes
 router.get('/teachers', getAllTeachers);
 router.get("/teachers/:id", getTeacherDetails);
 router.patch('/:leaveId/approve', approveLeave);
