@@ -158,7 +158,7 @@ const getLeaveById = async (req,res) => {
 const getAllTeachers = async (req, res) => {
   try {
     const teachers = await User.find({ role: "teacher" })
-      .select("name email office_department position");
+      .select("name email office_department position salary profilePicture, bio, role");
     
     res.status(200).json(teachers);
   } catch (error) {
@@ -170,7 +170,8 @@ const getTeacherDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const teacher = await User.findById(id).select("name email office_department position");
+    const teacher = await User.findById(id)
+      .select("name email office_department position salary profilePicture bio role username");
 
     if (!teacher) {
       return res.status(404).json({ error: "No teacher found" })
@@ -180,7 +181,8 @@ const getTeacherDetails = async (req, res) => {
 
     res.status(200).json({ teacher, leaves })
   } catch (error) {
-
+    console.error("Error fetching teacher details:", error);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
