@@ -21,6 +21,7 @@ const leaveSchema = new Schema({
     enum: [
       "vacation",
       "sick",
+      "mandatory-forced",
       "maternity",
       "paternity",
       "special-privilege",
@@ -43,30 +44,29 @@ const leaveSchema = new Schema({
   },
 
 
- // inside your leaveSchema definition
-sick: {
-  type: {
-    type: String,
-    enum: ["in-hospital", "out-patient"],
-    // setter runs before validation and enum checking
-    set: function (val) {
-      if (!val) return val;
-      const normalized = String(val).toLowerCase().replace(/[\s_-]+/g, "");
-      if (normalized === "outpatient") return "out-patient";
-      if (normalized === "inhospital") return "in-hospital";
-      // fallback: return lowercased original (so enum will still reject if unknown)
-      return String(val).toLowerCase();
-    },
-    validate: {
-      validator: function (val) {
-        if (!val) return true; // allow empty
-        return ["in-hospital", "out-patient"].includes(val);
+  sick: {
+    type: {
+      type: String,
+      enum: ["in-hospital", "out-patient"],
+      // setter runs before validation and enum checking
+      set: function (val) {
+        if (!val) return val;
+        const normalized = String(val).toLowerCase().replace(/[\s_-]+/g, "");
+        if (normalized === "outpatient") return "out-patient";
+        if (normalized === "inhospital") return "in-hospital";
+        // fallback: return lowercased original (so enum will still reject if unknown)
+        return String(val).toLowerCase();
       },
-      message: (props) => `${props.value} is not a valid sick leave type`
-    }
+      validate: {
+        validator: function (val) {
+          if (!val) return true; // allow empty
+          return ["in-hospital", "out-patient"].includes(val);
+        },
+        message: (props) => `${props.value} is not a valid sick leave type`
+      }
+    },
+    illness: String
   },
-  illness: String
-},
 
 
 
