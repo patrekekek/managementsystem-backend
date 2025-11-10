@@ -27,6 +27,7 @@
         username: user.username,
         email: user.email,
         role: user.role,
+        salary: user.salary,
         token,
         name: user.name,
         profilePicture: user.profilePicture,
