@@ -138,7 +138,7 @@ const getAllLeaves = async (req, res) => {
 };
 
 
-const getLeaveById = async (req,res) => {
+const getLeaveById = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -194,7 +194,7 @@ const generateExcelFile = async (req, res) => {
     }
 
     // ✅ 1. Check if template exists (optional safeguard)
-    const templatePath = path.join(__dirname, "../templates/leave-form-template.xlsx");
+    const templatePath = path.join(__dirname, "../templates/leave-form-template2.xlsx");
     const workbook = new ExcelJS.Workbook();
 
     try {
@@ -223,22 +223,86 @@ const generateExcelFile = async (req, res) => {
     };
 
     // ✅ 3. Fill template cells
-    sheet.getCell("B2").value = `${leave.name.last}, ${leave.name.first} ${
-      leave.name.middle ? leave.name.middle[0] + "." : ""
-    }`;
-    sheet.getCell("B3").value = leave.officeDepartment || "";
-    sheet.getCell("B4").value = leave.leaveType || "";
-    sheet.getCell("B5").value = formatDate(leave.startDate);
-    sheet.getCell("B6").value = formatDate(leave.endDate);
-    sheet.getCell("B7").value = leave.status || "";
-    sheet.getCell("B8").value = leave.numberOfDays || "";
-    sheet.getCell("B9").value = leave.position || "";
-    sheet.getCell("B10").value = leave.salary || "";
+    sheet.getCell("F5").value = leave.name.last;
+    sheet.getCell("J5").value = leave.name.first;
+    sheet.getCell("M5").value = leave.name.middle || "";
 
-    if (leave.leaveType === "sick") {
-      sheet.getCell("B11").value = leave.sick?.type || "";
-      sheet.getCell("B12").value = leave.sick?.illness || "";
+    //function of check fonts and unchecked the same
+    function setCheckbox(cell, checked = false) {
+      cell.value = checked ? "☑" : "□";
+      cell.font = { name: "Segoe UI Symbol", size: 12 };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
     }
+
+    //checkbox cells
+    const leaveTypeCells = {
+      vacation: "B11",
+      "mandatory-forced": "B13",
+      sick: "B15",
+      maternity: "B17",
+      paternity: "B19",
+      "special-privilege": "B21",
+      "solo-parent": "B23",
+      study: "B25",
+      vawc: "B27",
+      rehabilitation: "B29",
+      "special-women": "B31",
+      emergency: "B33",
+      adoption: "B35",
+      others: "",
+    };
+
+    //checkbox reset
+    for (const cell of Object.values(leaveTypeCells)) {
+      if (cell) setCheckbox(sheet.getCell(cell), false)
+    }
+
+    //check leave type
+    if (leave.leaveType && leaveTypeCells[leave.leaveType]) {
+      setCheckbox(sheet.getCell(leaveTypeCells[leave.leaveType]), true)
+    }
+
+    //if vacation leave-details
+    if (leave.leaveType === "vacation") {
+      
+      setCheckbox(sheet.getCell("H13"), !!leave.vacation?.withinPhilippines?.trim());
+      setCheckbox(sheet.getCell("H15"), !!leave.vacation?.abroad?.trim());
+
+      sheet.getCell("L13").value = leave.vacation?.withinPhilippines || "";
+      sheet.getCell("L15").value = leave.vacation?.abroad || "";
+    }
+
+    //if sick laeave
+    if (leave.leaveType === "sick") {
+
+      if (leave.sick?.type === "out-patient") {
+        setCheckbox(sheet.getCell("H19"), true);
+        sheet.getCell("L19").value = leave.sick?.illness?.trim() || "";
+      } else if (leave.sick?.type === "in-hospital") {
+        setCheckbox(sheet.getCell("H21"), true);
+        sheet.getCell("L21").value = leave.sick?.illness?.trim() || "";
+      }
+    }
+
+    //if special women
+
+
+    //if study leeave
+    if (leave.leaveType === "study") {
+      if (!leave.study?.mastersDegree) {
+        setCheckbox(sheet.getCell("H33"), true)
+      } else if (!leave.study?.boardExamReview) {
+        setCheckbox(sheet.getCell("H35"), true)
+      }
+    }
+
+    //if other purpose
+  
+
+
+
+
+
 
     // ✅ 4. Optional: mark checkboxes or X-marks in template
     // e.g., if your Excel has tick boxes for leaveType:
@@ -255,7 +319,7 @@ const generateExcelFile = async (req, res) => {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    res.send(buffer);
+    return res.send(buffer);
   } catch (error) {
     console.error("Excel generation failed:", error);
     res.status(500).json({ message: "Error generating Excel file", error: error.message });
