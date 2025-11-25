@@ -76,10 +76,14 @@ const leaveSchema = new Schema({
     boardExamReview: { type: Boolean, default: false }
   },
 
+  specialWomen: {
+    illness: String,
+  },
 
   others: {
     monetization: { type: Boolean, default: false },
-    terminal: { type: Boolean, default: false }
+    terminal: { type: Boolean, default: false },
+    reason: { type: String, default: "" }
   },
 
   numberOfDays: { type: Number, required: true },

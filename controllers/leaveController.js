@@ -15,6 +15,7 @@ const applyLeave = async (req, res) => {
     vacation,
     sick,
     study,
+    specialWomen,
     others,
     numberOfDays,
     startDate,
@@ -47,6 +48,7 @@ const applyLeave = async (req, res) => {
       vacation,
       sick,
       study,
+      specialWomen,
       others,
       numberOfDays,
       startDate: new Date(startDate),
@@ -189,11 +191,11 @@ const getTeacherDetails = async (req, res) => {
 const generateExcelFile = async (req, res) => {
   try {
     const leave = await Leave.findById(req.params.id).populate("user");
+    console.log("yow", leave)
     if (!leave) {
       return res.status(404).json({ message: "Leave request not found." });
     }
 
-    // ✅ 1. Check if template exists (optional safeguard)
     const templatePath = path.join(__dirname, "../templates/leave-form-template2.xlsx");
     const workbook = new ExcelJS.Workbook();
 
@@ -208,7 +210,7 @@ const generateExcelFile = async (req, res) => {
       return res.status(500).json({ message: "No worksheet found in template." });
     }
 
-    // ✅ 2. Safely handle date and optional fields
+    //optional fields
     const formatDate = (date) => {
       if (!date) return "";
       try {
@@ -222,7 +224,7 @@ const generateExcelFile = async (req, res) => {
       }
     };
 
-    // ✅ 3. Fill template cells
+    // template cells
     sheet.getCell("F5").value = leave.name.last;
     sheet.getCell("J5").value = leave.name.first;
     sheet.getCell("M5").value = leave.name.middle || "";
@@ -285,6 +287,10 @@ const generateExcelFile = async (req, res) => {
     }
 
     //if special women
+
+    if (leave.leaveType === "special-women") {
+      sheet.getCell("K27").value = leave.specialWomen?.illness?.trim() || "";
+    }
 
 
     //if study leeave
