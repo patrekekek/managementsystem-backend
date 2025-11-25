@@ -191,7 +191,6 @@ const getTeacherDetails = async (req, res) => {
 const generateExcelFile = async (req, res) => {
   try {
     const leave = await Leave.findById(req.params.id).populate("user");
-    console.log("yow", leave)
     if (!leave) {
       return res.status(404).json({ message: "Leave request not found." });
     }
@@ -228,6 +227,32 @@ const generateExcelFile = async (req, res) => {
     sheet.getCell("F5").value = leave.name.last;
     sheet.getCell("J5").value = leave.name.first;
     sheet.getCell("M5").value = leave.name.middle || "";
+
+    const filingDate = leave.dateOfFiling instanceof Date 
+      ? leave.dateOfFiling 
+      : new Date(leave.dateOfFiling);
+
+    sheet.getCell("D6").value = filingDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    sheet.getCell("F6").value = leave.position?.trim();
+    sheet.getCell("K6").value = leave.salary != null
+      ? `₱${leave.salary.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : "";
+
+
+    sheet.getCell("B45").value = leave.numberOfDays != null
+      ? `${leave.numberOfDays} Days`
+      : "";
+
+    const start = leave.startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const end = leave.endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    sheet.getCell("C48").value = `${start} - ${end}`;
+
 
     //function of check fonts and unchecked the same
     function setCheckbox(cell, checked = false) {
